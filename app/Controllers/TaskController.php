@@ -24,8 +24,61 @@ class TaskController extends BaseController
 
     public function index(): string
     {
+        $filters = [
+            'q'         => trim((string) $this->request->getGet('q')),
+            'status'    => (string) $this->request->getGet('status'),
+            'priority'  => (string) $this->request->getGet('priority'),
+            'assignee'  => (string) $this->request->getGet('assignee'),
+            'due_from'  => (string) $this->request->getGet('due_from'),
+            'due_to'    => (string) $this->request->getGet('due_to'),
+        ];
+
+        $builder = $this->taskModel->withRelations();
+
+        if ($filters['q'] !== '') {
+            $builder->groupStart()
+                ->like('tasks.title', $filters['q'])
+                ->orLike('tasks.description', $filters['q'])
+                ->groupEnd();
+        }
+
+        if (in_array($filters['status'], ['todo', 'in_progress', 'done'], true)) {
+            $builder->where('tasks.status', $filters['status']);
+        }
+
+        if (in_array($filters['priority'], ['low', 'medium', 'high'], true)) {
+            $builder->where('tasks.priority', $filters['priority']);
+        }
+
+        if ($filters['assignee'] !== '' && ctype_digit($filters['assignee'])) {
+            $builder->where('tasks.user_id', (int) $filters['assignee']);
+        }
+
+        if ($filters['due_from'] !== '') {
+            $builder->where('tasks.due_date >=', $filters['due_from']);
+        }
+
+        if ($filters['due_to'] !== '') {
+            $builder->where('tasks.due_date <=', $filters['due_to']);
+        }
+
+        $hasFilters = implode('', $filters) !== '';
+
         return view('tasks/index', [
-            'tasks' => $this->taskModel->withRelations()->orderBy('due_date', 'ASC')->findAll(),
+            'tasks' => $builder->orderBy('tasks.due_date', 'ASC')->findAll(),
+            'filters' => $filters,
+            'hasFilters' => $hasFilters,
+            'users' => $this->userModel->orderBy('name', 'ASC')->findAll(),
+            'statuses' => [
+                'todo' => 'To Do',
+                'in_progress' => 'In Progress',
+                'done' => 'Done',
+            ],
+            'priorities' => [
+                'low' => 'Low',
+                'medium' => 'Medium',
+                'high' => 'High',
+            ],
         ]);
     }
 

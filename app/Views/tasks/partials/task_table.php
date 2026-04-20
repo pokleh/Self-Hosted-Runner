@@ -12,7 +12,9 @@
 <tbody class="divide-y divide-slate-100 bg-white">
 <?php if (empty($tasks)) : ?>
     <tr>
-        <td colspan="7" class="px-4 py-8 text-center text-slate-500">No tasks yet. Create your first task.</td>
+        <td colspan="7" class="px-4 py-8 text-center text-slate-500">
+            <?= ! empty($hasFilters) ? 'No tasks match your current filters.' : 'No tasks yet. Create your first task.' ?>
+        </td>
     </tr>
 <?php endif; ?>
 <?php foreach ($tasks as $task) : ?>
