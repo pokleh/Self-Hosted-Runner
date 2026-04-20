@@ -45,6 +45,15 @@ php spark migrate
 php spark db:seed DatabaseSeeder
 ```
 
+## Authentication
+
+The app now requires login for all `/tasks` routes.
+
+Default seeded accounts:
+
+- `demo@example.com` / `password123` (role: `admin`)
+- `lead@example.com` / `password123` (role: `member`)
+
 ## Tailwind Build
 
 ```bash

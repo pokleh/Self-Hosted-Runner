@@ -96,7 +96,11 @@ class TaskController extends BaseController
             ->orderBy('task_comments.created_at', 'ASC')
             ->findAll();
 
-        return view('tasks/show', ['task' => $task, 'comments' => $comments]);
+        return view('tasks/show', [
+            'task' => $task,
+            'comments' => $comments,
+            'currentUser' => $this->currentUser,
+        ]);
     }
 
     public function create(): string
@@ -165,6 +169,61 @@ class TaskController extends BaseController
         return redirect()->to('/tasks')->with('message', 'Task deleted.');
     }
 
+    public function storeComment(int $taskId)
+    {
+        $task = $this->taskModel->find($taskId);
+        if (! $task) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Task not found.');
+        }
+
+        $payload = [
+            'task_id' => $taskId,
+            'user_id' => $this->currentUser['id'] ?? null,
+            'body' => trim((string) $this->request->getPost('body')),
+        ];
+
+        if (! $this->commentModel->insert($payload)) {
+            return redirect()->back()->withInput()->with('errors', $this->commentModel->errors());
+        }
+
+        return redirect()->to('/tasks/' . $taskId)->with('message', 'Comment added.');
+    }
+
+    public function updateComment(int $taskId, int $commentId)
+    {
+        $comment = $this->commentModel->find($commentId);
+        if (! $comment || (int) $comment['task_id'] !== $taskId) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Comment not found.');
+        }
+
+        if (! $this->canManageComment($comment)) {
+            return redirect()->back()->with('errors', ['You are not allowed to edit this comment.']);
+        }
+
+        $payload = ['body' => trim((string) $this->request->getPost('body'))];
+        if (! $this->commentModel->update($commentId, $payload)) {
+            return redirect()->back()->withInput()->with('errors', $this->commentModel->errors());
+        }
+
+        return redirect()->to('/tasks/' . $taskId)->with('message', 'Comment updated.');
+    }
+
+    public function deleteComment(int $taskId, int $commentId)
+    {
+        $comment = $this->commentModel->find($commentId);
+        if (! $comment || (int) $comment['task_id'] !== $taskId) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Comment not found.');
+        }
+
+        if (! $this->canManageComment($comment)) {
+            return redirect()->back()->with('errors', ['You are not allowed to delete this comment.']);
+        }
+
+        $this->commentModel->delete($commentId);
+
+        return redirect()->to('/tasks/' . $taskId)->with('message', 'Comment deleted.');
+    }
+
     private function formData(?array $task = null): array
     {
         return [
@@ -182,5 +241,13 @@ class TaskController extends BaseController
                 'high' => 'High',
             ],
         ];
+    }
+
+    private function canManageComment(array $comment): bool
+    {
+        $currentUserId = (int) ($this->currentUser['id'] ?? 0);
+        $currentUserRole = (string) ($this->currentUser['role'] ?? 'member');
+
+        return $currentUserRole === 'admin' || $currentUserId === (int) ($comment['user_id'] ?? 0);
     }
 }

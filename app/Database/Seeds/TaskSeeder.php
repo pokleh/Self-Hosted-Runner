@@ -9,10 +9,11 @@ class TaskSeeder extends Seeder
     public function run()
     {
         $now = date('Y-m-d H:i:s');
+        $defaultPassword = password_hash('password123', PASSWORD_DEFAULT);
 
         $this->db->table('users')->insertBatch([
-            ['name' => 'Demo User', 'email' => 'demo@example.com', 'created_at' => $now, 'updated_at' => $now],
-            ['name' => 'Project Lead', 'email' => 'lead@example.com', 'created_at' => $now, 'updated_at' => $now],
+            ['name' => 'Demo User', 'email' => 'demo@example.com', 'password_hash' => $defaultPassword, 'role' => 'admin', 'created_at' => $now, 'updated_at' => $now],
+            ['name' => 'Project Lead', 'email' => 'lead@example.com', 'password_hash' => $defaultPassword, 'role' => 'member', 'created_at' => $now, 'updated_at' => $now],
         ]);
 
         $this->db->table('projects')->insertBatch([
