@@ -1,0 +1,39 @@
+---
+description: Development workflow standard for planning, branching, PR, and merge
+alwaysApply: true
+---
+
+# Development Workflow Rule
+
+## 1) Start With Plan
+- Clarify requirements before coding when scope is ambiguous.
+- Break work into explicit to-dos and track progress from first to last task.
+
+## 2) Branching Strategy
+- Create a new branch for each feature/fix (e.g., `feat/...`, `fix/...`).
+- Do not implement feature work directly on `main`.
+
+## 3) Implementation Quality
+- Keep changes scoped to the requested feature.
+- Reuse existing project patterns and naming conventions.
+- Avoid committing runtime/local artifacts (`node_modules`, local DB files, logs, debug/session files, secrets).
+
+## 4) Verification Before Commit
+- Run quick syntax/lint checks for changed files.
+- If available, run relevant test/build commands for touched areas.
+- Fix obvious issues before creating a commit.
+
+## 5) Git Hygiene
+- Stage only relevant files.
+- Write commit messages that describe user value (why), not only file changes.
+- Push feature branch to origin with upstream tracking.
+
+## 6) Pull Request Standard
+- Open PR from feature branch to `main`.
+- PR body must include:
+  - Summary (what changed and why)
+  - Test plan checklist (how to verify)
+
+## 7) Merge Preference
+- Default merge method: **Squash merge** for a clean `main` history.
+- After merge, delete merged feature branch when safe.
