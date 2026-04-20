@@ -8,6 +8,6 @@
 
 <?= view('components/card', [
     'title' => $task['title'],
-    'slot' => view('tasks/partials/show_content', ['task' => $task, 'comments' => $comments]),
+    'slot' => view('tasks/partials/show_content', ['task' => $task, 'comments' => $comments, 'currentUser' => $currentUser ?? null]),
 ]) ?>
 <?= $this->endSection() ?>

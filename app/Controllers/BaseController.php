@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Models\TaskModel;
 use CodeIgniter\Controller;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -25,7 +26,7 @@ abstract class BaseController extends Controller
      * The creation of dynamic property is deprecated in PHP 8.2.
      */
 
-    // protected $session;
+    protected ?array $currentUser = null;
 
     /**
      * @return void
@@ -39,7 +40,23 @@ abstract class BaseController extends Controller
         // Caution: Do not edit this line.
         parent::initController($request, $response, $logger);
 
-        // Preload any models, libraries, etc, here.
-        // $this->session = service('session');
+        helper(['url', 'form']);
+
+        if (session()->get('user_id')) {
+            $this->currentUser = [
+                'id' => (int) session()->get('user_id'),
+                'name' => (string) session()->get('user_name'),
+                'email' => (string) session()->get('user_email'),
+                'role' => (string) session()->get('user_role'),
+            ];
+
+            $overdueCount = (new TaskModel())
+                ->where('status !=', 'done')
+                ->where('due_date <', date('Y-m-d'))
+                ->countAllResults();
+
+            view()->setVar('currentUser', $this->currentUser);
+            view()->setVar('overdueCount', $overdueCount);
+        }
     }
 }

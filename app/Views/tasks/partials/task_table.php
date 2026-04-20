@@ -29,7 +29,12 @@
         <td class="px-4 py-3"><?= view('components/badge', ['tone' => $task['priority'], 'label' => $priorityLabels[$task['priority']] ?? $task['priority']]) ?></td>
         <td class="px-4 py-3 text-slate-700"><?= esc($task['project_name'] ?? '—') ?></td>
         <td class="px-4 py-3 text-slate-700"><?= esc($task['assignee_name'] ?? '—') ?></td>
-        <td class="px-4 py-3 text-slate-700"><?= esc($task['due_date'] ?? '—') ?></td>
+        <td class="px-4 py-3 text-slate-700">
+            <?= esc($task['due_date'] ?? '—') ?>
+            <?php if (! empty($task['due_date']) && $task['status'] !== 'done' && strtotime($task['due_date']) < strtotime(date('Y-m-d'))) : ?>
+                <span class="ml-2 rounded-full bg-rose-100 px-2 py-0.5 text-xs font-medium text-rose-700">Overdue</span>
+            <?php endif; ?>
+        </td>
         <td class="px-4 py-3">
             <div class="flex justify-end gap-2">
                 <a href="<?= site_url('tasks/' . $task['id'] . '/edit') ?>" class="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100">Edit</a>
